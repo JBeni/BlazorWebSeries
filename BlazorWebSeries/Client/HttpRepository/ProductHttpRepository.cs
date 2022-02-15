@@ -54,5 +54,63 @@ namespace BlazorWebSeries.Client.HttpRepository
                 throw new ApplicationException(postContent);
             }
         }
+
+        public async Task<string> UploadProductImage(MultipartFormDataContent content)
+        {
+            var postResult = await _client.PostAsync("upload", content);
+            var postContent = await postResult.Content.ReadAsStringAsync();
+            if (!postResult.IsSuccessStatusCode)
+            {
+                throw new ApplicationException(postContent);
+            }
+            else
+            {
+                var imgUrl = Path.Combine("https://localhost:5011/", postContent);
+                return imgUrl;
+            }
+        }
+
+        public async Task<Product> GetProduct(string id)
+        {
+            var url = Path.Combine("products", id);
+
+            var response = await _client.GetAsync(url);
+            var content = await response.Content.ReadAsStringAsync();
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new ApplicationException(content);
+            }
+
+            var product = JsonSerializer.Deserialize<Product>(content, _options);
+            return product;
+        }
+
+        public async Task UpdateProduct(Product product)
+        {
+            var content = JsonSerializer.Serialize(product);
+            var bodyContent = new StringContent(content, Encoding.UTF8, "application/json");
+            var url = Path.Combine("products", product.Id.ToString());
+
+            var postResult = await _client.PutAsync(url, bodyContent);
+            var postContent = await postResult.Content.ReadAsStringAsync();
+
+            if (!postResult.IsSuccessStatusCode)
+            {
+                throw new ApplicationException(postContent);
+            }
+        }
+
+        public async Task DeleteProduct(Guid id)
+        {
+            var url = Path.Combine("products", id.ToString());
+
+            var deleteResult = await _client.DeleteAsync(url);
+            var deleteContent = await deleteResult.Content.ReadAsStringAsync();
+
+            if (!deleteResult.IsSuccessStatusCode)
+            {
+                throw new ApplicationException(deleteContent);
+            }
+        }
     }
 }
