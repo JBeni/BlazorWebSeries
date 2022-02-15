@@ -5,6 +5,8 @@
 @using BlazorWebSeries.Shared.Entities
 @using BlazorWebSeries.Shared.RequestFeatures
 
+@inject IProductHttpRepository? ProductRepository
+
 <div class="row">
     <div class="col-md-5">
         <Search OnSearchChanged="SearchChanged"/>
@@ -16,23 +18,32 @@
         <a href="/createProduct">Create Product</a>
     </div>
 </div>
-<div class="row">
-    <ProductTable Products="ProductList" />
-</div>
-<div class="row">
-    <div class="col">
-        <Pagination MetaData="MetaData" Spread="2" SelectedPage="SelectedPage" />
+
+@if (ProductList is not null)
+{
+    <div class="row">
+        <ProductTable Products="ProductList" />
     </div>
-</div>
+    <div class="row">
+        <div class="col">
+            <Pagination MetaData="MetaData" Spread="2" SelectedPage="SelectedPage" />
+        </div>
+    </div>
+}
+else
+{
+    <div id="app">
+        <div class="d-flex justify-content-center display-3" style="margin-top: 170px;">
+            <MatProgressCircle Indeterminate="true" FourColored="true" Size="MatProgressCircleSize.Large" />    
+        </div>
+    </div>
+}
 
 @code {
-    public List<Product> ProductList { get; set; } = new List<Product>();
+    public List<Product>? ProductList { get; set; }
     public MetaData MetaData { get; set; } = new MetaData();
 
     private ProductParameters _productParameters = new ProductParameters();
-
-    [Inject]
-    public IProductHttpRepository ProductRepo { get; set; }
 
     protected async override Task OnInitializedAsync()
     {
@@ -47,7 +58,7 @@
 
     private async Task GetProducts()
     {
-        var pagingResponse = await ProductRepo.GetProducts(_productParameters);
+        var pagingResponse = await ProductRepository.GetProducts(_productParameters);
         ProductList = pagingResponse.Items;
         MetaData = pagingResponse.MetaData;
     }
