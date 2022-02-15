@@ -5,7 +5,9 @@
 @using BlazorWebSeries.Shared.Entities
 @using BlazorWebSeries.Shared.RequestFeatures
 
-@inject IProductHttpRepository? ProductRepository
+@attribute [Authorize(Roles="Administrator")]
+
+@inject IProductHttpRepository? ProductRepo
 
 <div class="row">
     <div class="col-md-5">
@@ -40,7 +42,7 @@ else
 }
 
 @code {
-    public List<Product>? ProductList { get; set; }
+    public List<Product> ProductList { get; set; } = new List<Product>();
     public MetaData MetaData { get; set; } = new MetaData();
 
     private ProductParameters _productParameters = new ProductParameters();
@@ -58,7 +60,7 @@ else
 
     private async Task GetProducts()
     {
-        var pagingResponse = await ProductRepository.GetProducts(_productParameters);
+        var pagingResponse = await ProductRepo.GetProducts(_productParameters);
         ProductList = pagingResponse.Items;
         MetaData = pagingResponse.MetaData;
     }
@@ -75,6 +77,13 @@ else
     {
         Console.WriteLine(orderBy);
         _productParameters.OrderBy = orderBy;
+        await GetProducts();
+    }
+
+    private async Task DeleteProduct(Guid id)
+    {
+        await ProductRepo.DeleteProduct(id);
+        _productParameters.PageNumber = 1;
         await GetProducts();
     }
 }
