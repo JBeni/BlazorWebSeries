@@ -1,7 +1,9 @@
 using Blazored.Toast;
 using BlazorWebSeries.Client;
+using BlazorWebSeries.Client.AuthProviders;
 using BlazorWebSeries.Client.HttpRepository;
 using MatBlazor;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Toolbelt.Blazor.Extensions.DependencyInjection;
@@ -20,6 +22,9 @@ try
 
     builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7085/api/") });
     builder.Services.AddScoped<IProductHttpRepository, ProductHttpRepository>();
+
+    builder.Services.AddAuthorizationCore();
+    builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
 
     builder.UseLoadingBar();
     await builder.Build().RunAsync();
